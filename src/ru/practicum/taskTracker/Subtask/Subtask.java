@@ -1,5 +1,9 @@
+package ru.practicum.taskTracker.Subtask;
+
+import ru.practicum.taskTracker.Task.Task;
+
 public class Subtask extends Task {
-    private int epicId;
+    private final int epicId;
 
     public Subtask(String title, String description, int epicId) {
         super(title, description);
@@ -10,18 +14,14 @@ public class Subtask extends Task {
         return epicId;
     }
 
-    public void setEpicId(int epicId) {
-        this.epicId = epicId;
-    }
-
     @Override
     public String toString() {
         return "Subtask{" +
-                "id=" + getId() +
-                ", title='" + getTitle() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", status=" + getStatus() +
-                ", epicId=" + epicId +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", epicId=" + epicId + '\'' +
                 '}';
     }
 }
