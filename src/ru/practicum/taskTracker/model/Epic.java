@@ -1,7 +1,4 @@
-package ru.practicum.taskTracker.Epic;
-
-import ru.practicum.taskTracker.Subtask.Subtask;
-import ru.practicum.taskTracker.Task.Task;
+package ru.practicum.taskTracker.model;
 
 import java.util.*;
 
@@ -25,10 +22,10 @@ public class Epic extends Task {
         subtasksList.clear();
     }
 
-    public void deleteSubtaskById(int id) {
+    public void deleteSubtaskById(Subtask deletedSubtask) {
         int index = 0;
         for(Subtask subtask : subtasksList) {
-            if(id == subtask.getId()) {
+            if(deletedSubtask.getId() == subtask.getId()) {
                 index = subtasksList.indexOf(subtask);
             }
         }
@@ -36,13 +33,16 @@ public class Epic extends Task {
     }
 
     public void updateSubtaskById(Subtask updatedSubtask) {
+        int index = 0;
         for (Subtask subtask : subtasksList) {
-            if(subtask.getId() == updatedSubtask.getId()) {
-                subtask.setDescription(updatedSubtask.getDescription());
-                subtask.setName(updatedSubtask.getName());
+            if(updatedSubtask.getId() == subtask.getId()) {
+                index = subtasksList.indexOf(subtask);
             }
         }
+        subtasksList.remove(index);
+        subtasksList.add(updatedSubtask);
     }
+
 
     @Override
     public String toString() {
@@ -51,6 +51,7 @@ public class Epic extends Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", subtasksList=" + subtasksList +
                 '}';
     }
 }

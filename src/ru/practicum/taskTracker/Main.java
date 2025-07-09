@@ -1,11 +1,10 @@
 package ru.practicum.taskTracker;
 
-
-import ru.practicum.taskTracker.Epic.Epic;
-import ru.practicum.taskTracker.Manager.TaskManager;
-import ru.practicum.taskTracker.Status.Status;
-import ru.practicum.taskTracker.Subtask.Subtask;
-import ru.practicum.taskTracker.Task.Task;
+import ru.practicum.taskTracker.model.Epic;
+import ru.practicum.taskTracker.model.Status;
+import ru.practicum.taskTracker.model.Subtask;
+import ru.practicum.taskTracker.model.Task;
+import ru.practicum.taskTracker.service.TaskManager;
 
 public class Main {
 
@@ -33,10 +32,7 @@ public class Main {
         manager.addEpic(epic1);
         manager.addEpic(epic2);
 
-        System.out.println("\nВсе эпики:");
-        for (Epic epic : manager.getAllEpics()) {
-            System.out.println(epic);
-        }
+
 
         // 3. Добавляем подзадачи к эпику
         Subtask sub1 = new Subtask("Выучить тему 1", "Основы Java", epic1.getId());
@@ -46,6 +42,11 @@ public class Main {
         manager.addSubtask(sub1);
         manager.addSubtask(sub2);
         manager.addSubtask(sub3);
+
+        System.out.println("\nВсе эпики:");
+        for (Epic epic : manager.getAllEpics()) {
+            System.out.println(epic);
+        }
 
         System.out.println("\nВсе подзадачи:");
         for (Subtask sub : manager.getAllSubtasks()) {
@@ -61,9 +62,16 @@ public class Main {
 
         // 4. Обновляем статус подзадачи
         sub1.setStatus(Status.DONE);
+        sub2.setStatus(Status.IN_PROGRESS);
         manager.updateSubtask(sub1);
+        manager.updateSubtask(sub2);
 
         System.out.println("\nСтатус эпика '" + epic1.getName() + "' после обновления подзадачи: " + epic1.getStatus());
+
+        System.out.println("\nВсе эпики:");
+        for (Epic epic : manager.getAllEpics()) {
+            System.out.println(epic);
+        }
 
         // 5. Обновляем обычную задачу
         task1.setDescription("Обновлённое описание");

@@ -1,8 +1,8 @@
-package ru.practicum.taskTracker.Manager;
-import ru.practicum.taskTracker.Epic.Epic;
-import ru.practicum.taskTracker.Status.Status;
-import ru.practicum.taskTracker.Subtask.Subtask;
-import ru.practicum.taskTracker.Task.Task;
+package ru.practicum.taskTracker.service;
+import ru.practicum.taskTracker.model.Status;
+import ru.practicum.taskTracker.model.Task;
+import ru.practicum.taskTracker.model.Epic;
+import ru.practicum.taskTracker.model.Subtask;
 
 import java.util.*;
 
@@ -59,12 +59,13 @@ public class TaskManager {
     // Добавляет подзадачи
     public int addSubtask(Subtask subtask) {
         if(subtask == null) return -1;
-        int id = generateId();
-        subtask.setId(id);
+
         int epicId = subtask.getEpicId();
         if(!epics.containsKey(epicId)) {
             throw new IllegalArgumentException("Эпик с id " + epicId + " не найден.");
         }
+        int id = generateId();
+        subtask.setId(id);
 
         subtasks.put(id, subtask);
         Epic epic = epics.get(epicId);
@@ -100,17 +101,14 @@ public class TaskManager {
 
     // Удаляет все эпики
     public void deleteAllEpics() {
-        for(Integer key : epics.keySet()) {
-            epics.get(key).deleteAllSubtasks();
-        }
         epics.clear();
+        subtasks.clear();
     }
 
     // Удаляет все подзадачи
     public void deleteAllSubtasks() {
         subtasks.clear();
-        for (Integer key : epics.keySet()) {
-            Epic epic = epics.get(key);
+        for (Epic epic : epics.values()) {
             epic.setStatus(Status.NEW);
             epic.deleteAllSubtasks();
         }
@@ -146,7 +144,7 @@ public class TaskManager {
         Subtask subtask = subtasks.get(id);
         int epicId = subtask.getEpicId();
         Epic epic = epics.get(epicId);
-        epic.deleteSubtaskById(id);
+        epic.deleteSubtaskById(subtask);
         subtasks.remove(id);
         updateEpicStatus(epicId);
     }

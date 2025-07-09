@@ -1,5 +1,4 @@
-package ru.practicum.taskTracker.Task;
-import ru.practicum.taskTracker.Status.Status;
+package ru.practicum.taskTracker.model;
 
 import java.util.Objects;
 

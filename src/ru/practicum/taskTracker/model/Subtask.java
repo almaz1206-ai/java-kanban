@@ -1,6 +1,4 @@
-package ru.practicum.taskTracker.Subtask;
-
-import ru.practicum.taskTracker.Task.Task;
+package ru.practicum.taskTracker.model;
 
 public class Subtask extends Task {
     private final int epicId;
