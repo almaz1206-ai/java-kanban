@@ -4,6 +4,8 @@ import ru.practicum.taskTracker.model.Epic;
 import ru.practicum.taskTracker.model.Status;
 import ru.practicum.taskTracker.model.Subtask;
 import ru.practicum.taskTracker.model.Task;
+import ru.practicum.taskTracker.service.InMemoryTaskManager;
+import ru.practicum.taskTracker.service.Managers;
 import ru.practicum.taskTracker.service.TaskManager;
 
 public class Main {
@@ -11,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
 
 //        System.out.println("Поехали!");
-        TaskManager manager = new TaskManager();
+        TaskManager manager = Managers.getDefault();
 
         System.out.println("=== ТЕСТИРУЕМ РАБОТУ С ЗАДАЧАМИ ===");
 
@@ -56,6 +58,24 @@ public class Main {
         System.out.println("\nПодзадачи эпика '" + epic1.getName() + "':");
         for (Subtask sub : manager.getSubtasksByEpic(epic1.getId())) {
             System.out.println("   " + sub);
+        }
+
+        manager.getTaskById(task1.getId());
+        manager.getEpicById(epic1.getId());
+        manager.getEpicById(epic1.getId());
+        manager.getEpicById(epic1.getId());
+        manager.getTaskById(task1.getId());
+        manager.getSubtaskById(sub1.getId());
+        manager.getSubtaskById(sub1.getId());
+        manager.getSubtaskById(sub2.getId());
+        manager.getTaskById(task1.getId());
+        manager.getTaskById(task1.getId());
+        manager.getTaskById(task2.getId());
+        manager.getTaskById(task2.getId());
+
+        System.out.println("\nИстория просмотров:");
+        for (Task t : manager.getHistory()) {
+            System.out.println(t);
         }
 
         System.out.println("\nСтатус эпика '" + epic1.getName() + "': " + epic1.getStatus());
