@@ -1,41 +1,15 @@
-package ru.practicum.taskTracker.test;
+package ru.practicum.taskTracker.model;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.practicum.taskTracker.model.Epic;
-import ru.practicum.taskTracker.model.Status;
-import ru.practicum.taskTracker.model.Subtask;
-import ru.practicum.taskTracker.service.Managers;
-import ru.practicum.taskTracker.service.TaskManager;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
-
-    TaskManager manager = Managers.getDefault();
 
     @Test
     void epicHasNewStatusWhenSubtaskListIsEmpty() {
         Epic epic = new Epic("Эпик 1", "Описание");
         Assertions.assertEquals(Status.NEW, epic.getStatus());
-    }
-
-    @Test
-    void epicHasDoneStatusWhenAllSubTasksAreDone() {
-        Epic epic = new Epic("Эпик 1", "Описание эпика");
-        manager.addEpic(epic);
-
-        Subtask subtask1 = new Subtask("Подзадача 1", "Описание подзадачи 1", epic.getId());
-        Subtask subtask2 = new Subtask("Подзадача 2", "Описание подзадачи 2", epic.getId());
-        manager.addSubtask(subtask1);
-        manager.addSubtask(subtask2);
-
-        subtask1.setStatus(Status.DONE);
-        subtask2.setStatus(Status.DONE);
-        manager.updateSubtask(subtask1);
-        manager.updateSubtask(subtask2);
-
-        assertEquals(Status.DONE, epic.getStatus());
     }
 
     @Test

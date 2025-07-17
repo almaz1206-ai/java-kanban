@@ -4,7 +4,6 @@ import ru.practicum.taskTracker.model.Epic;
 import ru.practicum.taskTracker.model.Subtask;
 import ru.practicum.taskTracker.model.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
@@ -13,7 +12,7 @@ public interface TaskManager {
     int addTask(Task task);
 
     // Возвращает все задачи
-    ArrayList<Task> getAllTasks();
+    List<Task> getAllTasks();
 
     // Возвращает задачу по Id
     Task getTaskById(int id);
@@ -22,7 +21,7 @@ public interface TaskManager {
     int addEpic(Epic epic);
 
     // Возвращает все эпики
-    ArrayList<Epic> getAllEpics();
+    List<Epic> getAllEpics();
 
     // Возвращает эпик по Id
     Epic getEpicById(int id);
@@ -31,10 +30,10 @@ public interface TaskManager {
     int addSubtask(Subtask subtask);
 
     // Получаем все подзадачи
-    ArrayList<Subtask> getAllSubtasks();
+    List<Subtask> getAllSubtasks();
 
     // Возвращает подзадачи эпиков
-    ArrayList<Subtask> getSubtasksByEpic(int epicId);
+    List<Subtask> getSubtasksByEpic(int epicId);
 
     // Возвращает подзадачу по Id
     Subtask getSubtaskById(int id);

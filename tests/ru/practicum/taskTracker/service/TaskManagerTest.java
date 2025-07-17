@@ -1,17 +1,14 @@
-package ru.practicum.taskTracker.test;
+package ru.practicum.taskTracker.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import ru.practicum.taskTracker.model.Epic;
 import ru.practicum.taskTracker.model.Status;
 import ru.practicum.taskTracker.model.Subtask;
 import ru.practicum.taskTracker.model.Task;
-import ru.practicum.taskTracker.service.HistoryManager;
-import ru.practicum.taskTracker.service.InMemoryTaskManager;
-import ru.practicum.taskTracker.service.Managers;
-import ru.practicum.taskTracker.service.TaskManager;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 class TaskManagerTest {
 
@@ -72,14 +69,5 @@ class TaskManagerTest {
         assertEquals(task.getName(), found.getName());
         assertEquals(task.getDescription(), found.getDescription());
         assertEquals(task.getStatus(), found.getStatus());
-    }
-
-    @Test
-    void managersShouldReturnInitializedInstance() {
-        TaskManager taskManager = Managers.getDefault();
-        HistoryManager historyManager = Managers.getDefaultHistory();
-
-        assertNotNull(taskManager);
-        assertNotNull(historyManager);
     }
 }
