@@ -1,0 +1,7 @@
+./test/ru/practicum/taskTracker/model/EpicTest.java
+./test/ru/practicum/taskTracker/model/SubtaskTest.java
+./test/ru/practicum/taskTracker/model/TaskTest.java
+./test/ru/practicum/taskTracker/service/HistoryManagerTest.java
+./test/ru/practicum/taskTracker/service/InMemoryTaskManagerTest.java
+./test/ru/practicum/taskTracker/service/ManagersTest.java
+./test/ru/practicum/taskTracker/service/TaskManagerTest.java

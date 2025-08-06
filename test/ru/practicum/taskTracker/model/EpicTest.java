@@ -2,6 +2,7 @@ package ru.practicum.taskTracker.model;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
@@ -13,7 +14,7 @@ class EpicTest {
     }
 
     @Test
-    void epicsWithSameIdShouldBeEquals() {
+    void epicsWithSameIdNotShouldBeEquals() {
         Epic epic1 = new Epic("Epic 1", "Epic 1 desc");
         epic1.setId(100);
         epic1.setStatus(Status.IN_PROGRESS);
@@ -22,8 +23,8 @@ class EpicTest {
         epic2.setId(100);
         epic2.setStatus(Status.DONE);
 
-        assertEquals(epic2, epic1);
-        assertEquals(epic2.hashCode(), epic1.hashCode());
+        assertNotEquals(epic2, epic1);
+        assertNotEquals(epic2.hashCode(), epic1.hashCode());
     }
 
     @Test

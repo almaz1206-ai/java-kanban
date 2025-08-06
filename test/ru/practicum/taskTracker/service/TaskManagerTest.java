@@ -9,7 +9,6 @@ import ru.practicum.taskTracker.model.Status;
 import ru.practicum.taskTracker.model.Subtask;
 import ru.practicum.taskTracker.model.Task;
 
-
 class TaskManagerTest {
 
     TaskManager manager;

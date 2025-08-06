@@ -24,8 +24,8 @@ public class Epic extends Task {
 
     public void deleteSubtaskById(Subtask deletedSubtask) {
         int index = 0;
-        for(Subtask subtask : subtasksList) {
-            if(deletedSubtask.getId() == subtask.getId()) {
+        for (Subtask subtask : subtasksList) {
+            if (deletedSubtask.getId() == subtask.getId()) {
                 index = subtasksList.indexOf(subtask);
             }
         }
@@ -35,7 +35,7 @@ public class Epic extends Task {
     public void updateSubtaskById(Subtask updatedSubtask) {
         int index = 0;
         for (Subtask subtask : subtasksList) {
-            if(updatedSubtask.getId() == subtask.getId()) {
+            if (updatedSubtask.getId() == subtask.getId()) {
                 index = subtasksList.indexOf(subtask);
             }
         }

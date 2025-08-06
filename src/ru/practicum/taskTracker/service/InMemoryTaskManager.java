@@ -1,4 +1,5 @@
 package ru.practicum.taskTracker.service;
+
 import ru.practicum.taskTracker.model.Status;
 import ru.practicum.taskTracker.model.Task;
 import ru.practicum.taskTracker.model.Epic;
@@ -27,7 +28,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Добавление задачи
     @Override
     public int addTask(Task task) {
-        if(task == null) return -1;
+        if (task == null) return -1;
         int id = generateId();
         task.setId(id);
         tasks.put(id, task);
@@ -44,7 +45,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(int id) {
         Task task = tasks.get(id);
-        if(task != null) {
+        if (task != null) {
             historyManager.add(task);
         }
         return task;
@@ -53,7 +54,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Добаляет эпик
     @Override
     public int addEpic(Epic epic) {
-        if(epic == null) return -1;
+        if (epic == null) return -1;
         int id = generateId();
         epic.setId(id);
         epics.put(id, epic);
@@ -70,7 +71,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpicById(int id) {
         Epic epic = epics.get(id);
-        if(epic != null) {
+        if (epic != null) {
             historyManager.add(epic);
         }
         return epic;
@@ -79,10 +80,10 @@ public class InMemoryTaskManager implements TaskManager {
     // Добавляет подзадачи
     @Override
     public int addSubtask(Subtask subtask) {
-        if(subtask == null) return -1;
+        if (subtask == null) return -1;
 
         int epicId = subtask.getEpicId();
-        if(!epics.containsKey(epicId)) {
+        if (!epics.containsKey(epicId)) {
             throw new IllegalArgumentException("Эпик с id " + epicId + " не найден.");
         }
 
@@ -106,7 +107,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Возвращает подзадачи эпиков
     @Override
     public ArrayList<Subtask> getSubtasksByEpic(int epicId) {
-        if(!epics.containsKey(epicId)) {
+        if (!epics.containsKey(epicId)) {
             throw new IllegalArgumentException("Эпик с id " + epicId + " не найден.");
         }
 
@@ -117,7 +118,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtaskById(int id) {
         Subtask subtask = subtasks.get(id);
-        if(subtask != null) {
+        if (subtask != null) {
             historyManager.add(subtask);
         }
         return subtask;
@@ -149,7 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаляет задачу по идентификатору
     @Override
     public void deleteTaskById(int id) {
-        if(!tasks.containsKey(id)) {
+        if (!tasks.containsKey(id)) {
             throw new IllegalArgumentException("Такой задачи нет");
         }
         tasks.remove(id);
@@ -158,7 +159,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаляет эпик по идентификатору
     @Override
     public void deleteEpicById(int id) {
-        if(!epics.containsKey(id)) {
+        if (!epics.containsKey(id)) {
             throw new IllegalArgumentException("Эпика с таким идентификатором нет");
         }
 
@@ -173,7 +174,7 @@ public class InMemoryTaskManager implements TaskManager {
     //Удаляет подзадачи по идентификатору
     @Override
     public void deleteSubtaskById(int id) {
-        if(!subtasks.containsKey(id)) {
+        if (!subtasks.containsKey(id)) {
             throw new IllegalArgumentException("Подзадачи с таким идентификатором нет");
         }
         Subtask subtask = subtasks.get(id);
@@ -187,7 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Обновление задачи
     @Override
     public void updateTask(Task updatedTask) {
-        if(updatedTask == null || !tasks.containsKey(updatedTask.getId())) {
+        if (updatedTask == null || !tasks.containsKey(updatedTask.getId())) {
             return;
         }
 
@@ -206,7 +207,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Обновление подзадачи
     @Override
     public void updateSubtask(Subtask updatedSubtask) {
-        if(updatedSubtask == null || !subtasks.containsKey(updatedSubtask.getId())) {
+        if (updatedSubtask == null || !subtasks.containsKey(updatedSubtask.getId())) {
             return;
         }
         subtasks.put(updatedSubtask.getId(), updatedSubtask);
