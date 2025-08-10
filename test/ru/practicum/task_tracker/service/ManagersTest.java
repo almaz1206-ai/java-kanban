@@ -1,12 +1,12 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import ru.practicum.taskTracker.model.Epic;
-import ru.practicum.taskTracker.model.Status;
-import ru.practicum.taskTracker.model.Subtask;
+import ru.practicum.task_tracker.model.Epic;
+import ru.practicum.task_tracker.model.Status;
+import ru.practicum.task_tracker.model.Subtask;
 
 
 class ManagersTest {

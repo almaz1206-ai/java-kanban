@@ -1,8 +1,8 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
-import ru.practicum.taskTracker.model.Epic;
-import ru.practicum.taskTracker.model.Subtask;
-import ru.practicum.taskTracker.model.Task;
+import ru.practicum.task_tracker.model.Epic;
+import ru.practicum.task_tracker.model.Subtask;
+import ru.practicum.task_tracker.model.Task;
 
 import java.util.List;
 

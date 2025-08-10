@@ -1,4 +1,4 @@
-package ru.practicum.taskTracker.model;
+package ru.practicum.task_tracker.model;
 
 import java.util.Objects;
 
@@ -61,11 +61,13 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id;
+        return (getId() == task.getId()) &&
+                Objects.equals(getName(), task.getName()) &&
+                Objects.equals(getDescription(), task.getDescription());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getName(), getDescription());
     }
 }
