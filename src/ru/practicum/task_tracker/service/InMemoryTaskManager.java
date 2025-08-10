@@ -1,9 +1,9 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
-import ru.practicum.taskTracker.model.Status;
-import ru.practicum.taskTracker.model.Task;
-import ru.practicum.taskTracker.model.Epic;
-import ru.practicum.taskTracker.model.Subtask;
+import ru.practicum.task_tracker.model.Status;
+import ru.practicum.task_tracker.model.Task;
+import ru.practicum.task_tracker.model.Epic;
+import ru.practicum.task_tracker.model.Subtask;
 
 import java.util.*;
 
@@ -127,12 +127,23 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаляет все задачи
     @Override
     public void deleteAllTasks() {
+        for (Task task : tasks.values()) {
+            historyManager.remove(task.getId());
+        }
         tasks.clear();
     }
 
     // Удаляет все эпики
     @Override
     public void deleteAllEpics() {
+        for (Subtask subtask : subtasks.values()) {
+            historyManager.remove(subtask.getId());
+        }
+
+        for (Epic epic : epics.values()) {
+            historyManager.remove(epic.getId());
+        }
+
         epics.clear();
         subtasks.clear();
     }
@@ -140,6 +151,10 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаляет все подзадачи
     @Override
     public void deleteAllSubtasks() {
+        for (Subtask subtask : subtasks.values()) {
+            historyManager.remove(subtask.getId());
+        }
+
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.setStatus(Status.NEW);
@@ -153,6 +168,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (!tasks.containsKey(id)) {
             throw new IllegalArgumentException("Такой задачи нет");
         }
+        historyManager.remove(id);
         tasks.remove(id);
     }
 
@@ -167,7 +183,9 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (Subtask subtask : epic.getSubtasksList()) {
             subtasks.remove(subtask.getId());
+            historyManager.remove(subtask.getId());
         }
+        historyManager.remove(id);
         epics.remove(id);
     }
 
@@ -181,6 +199,7 @@ public class InMemoryTaskManager implements TaskManager {
         int epicId = subtask.getEpicId();
         Epic epic = epics.get(epicId);
         epic.deleteSubtaskById(subtask);
+        historyManager.remove(id);
         subtasks.remove(id);
         updateEpicStatus(epicId);
     }

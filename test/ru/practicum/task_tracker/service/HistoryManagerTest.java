@@ -1,13 +1,13 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-import ru.practicum.taskTracker.model.Epic;
-import ru.practicum.taskTracker.model.Subtask;
-import ru.practicum.taskTracker.model.Task;
+import ru.practicum.task_tracker.model.Epic;
+import ru.practicum.task_tracker.model.Subtask;
+import ru.practicum.task_tracker.model.Task;
 
 class HistoryManagerTest {
     private HistoryManager historyManager;

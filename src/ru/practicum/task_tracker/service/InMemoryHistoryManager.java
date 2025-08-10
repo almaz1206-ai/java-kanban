@@ -1,71 +1,68 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
-import ru.practicum.taskTracker.model.Node;
-import ru.practicum.taskTracker.model.Task;
+import ru.practicum.task_tracker.model.Node;
+import ru.practicum.task_tracker.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    //    private final List<Task> history = new ArrayList<>();
-//    private static final int MAX_HISTORY_SIZE = 10;
     private Node head;
     private Node tail;
     private final HashMap<Integer, Node> historyMap = new HashMap<>();
 
-    public void removeNode(Node node) {
-        Node prev = node.prev;
-        Node next = node.next;
+    private void removeNode(Node node) {
+        Node prev = node.getPrev();
+        Node next = node.getNext();
         if (prev == null) {
             head = next;
         } else {
-            prev.next = next;
-            node.prev = null;
+            prev.setNext(next);
+            node.setPrev(null);
         }
 
         if (next == null) {
             tail = prev;
         } else {
-            next.prev = prev;
-            node.next = null;
+            next.setPrev(prev);
+            node.setNext(null);
         }
-        node.task = null;
+        node.setTask(null);
     }
 
-    public void linkLast(Task task) {
+    private void linkLast(Task task) {
         Node oldTail = tail;
         Node newNode = new Node(oldTail, task, null);
         tail = newNode;
         if (oldTail == null) {
             head = newNode;
         } else {
-            oldTail.next = newNode;
+            oldTail.setNext(newNode);
         }
         historyMap.put(task.getId(), newNode);
     }
 
-    public List<Task> getTasks() {
+    private List<Task> getTasks() {
         List<Task> history = new ArrayList<>();
         Node node = head;
 
         while (node != null) {
-            history.add(node.task);
-            node = node.next;
+            history.add(node.getTask());
+            node = node.getNext();
         }
         return history;
     }
 
     @Override
     public void add(Task task) {
+        if (task == null) return;
         if (historyMap.containsKey(task.getId())) {
-            Node node = historyMap.get(task.getId());
-
-            linkLast(task);
-            removeNode(node);
-        } else {
-            linkLast(task);
+            removeNode(historyMap.get(task.getId()));
         }
+
+        linkLast(task);
+
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
 public class Managers {
     public static TaskManager getDefault() {

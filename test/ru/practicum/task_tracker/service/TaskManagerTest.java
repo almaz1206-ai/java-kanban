@@ -1,24 +1,28 @@
-package ru.practicum.taskTracker.service;
+package ru.practicum.task_tracker.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.taskTracker.model.Epic;
-import ru.practicum.taskTracker.model.Subtask;
-import ru.practicum.taskTracker.model.Task;
+import static org.junit.jupiter.api.Assertions.*;
+
+import ru.practicum.task_tracker.model.Epic;
+import ru.practicum.task_tracker.model.Status;
+import ru.practicum.task_tracker.model.Subtask;
+import ru.practicum.task_tracker.model.Task;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+class TaskManagerTest {
 
-class InMemoryTaskManagerTest {
-    private TaskManager taskManager;
-    private Task task1;
-    private Epic epic;
-    private Subtask subtask1;
-    private Subtask subtask2;
+    TaskManager manager;
+    TaskManager taskManager;
+    Task task1;
+    Epic epic;
+    Subtask subtask1;
+    Subtask subtask2;
 
     @BeforeEach
     void beforeEach() {
+        manager = new InMemoryTaskManager(Managers.getDefaultHistory());
         taskManager = Managers.getDefault();
         task1 = new Task("Task 1", "Task 1 desc");
         task1.setId(1);
@@ -26,6 +30,58 @@ class InMemoryTaskManagerTest {
         epic.setId(1);
         subtask1 = new Subtask("Subtask 1", "Subtask 1 desc", epic.getId());
         subtask2 = new Subtask("Subtask 2", "Subtask 2 desc", epic.getId());
+    }
+
+    @Test
+    void taskWithGeneratedIdAndTaskWithSetIdShouldNotConflict() {
+        Task task1 = new Task("Task 1", "Task 1 desc");
+        manager.addTask(task1);
+
+        Task task2 = new Task("Task 2", "Task 2 desc");
+        task2.setId(1);
+        manager.addTask(task2);
+
+        assertNotEquals(task2, task1);
+    }
+
+    @Test
+    void taskManagerCanAddAndGetEpics() {
+        Epic epic = new Epic("Epic", "Epic desc");
+        manager.addEpic(epic);
+
+        Epic found = manager.getEpicById(epic.getId());
+
+        assertNotNull(found);
+        assertEquals(epic, found);
+    }
+
+    @Test
+    void taskManagerCanAddAndGetSubtasks() {
+        Epic epic = new Epic("Эпик", "Описание");
+        manager.addEpic(epic);
+
+        Subtask subtask = new Subtask("Подзадача", "Описание", epic.getId());
+        manager.addSubtask(subtask);
+
+        Subtask found = manager.getSubtaskById(subtask.getId());
+
+        assertNotNull(found);
+        assertEquals(subtask, found);
+    }
+
+    @Test
+    void taskShouldNotChangeAfterAddingToManager() {
+        Task task = new Task("Task", "Task desc");
+        task.setStatus(Status.IN_PROGRESS);
+
+        manager.addTask(task);
+
+        Task found = manager.getTaskById(task.getId());
+
+        assertEquals(task.getId(), found.getId());
+        assertEquals(task.getName(), found.getName());
+        assertEquals(task.getDescription(), found.getDescription());
+        assertEquals(task.getStatus(), found.getStatus());
     }
 
     @Test
