@@ -23,8 +23,8 @@ class EpicTest {
         epic2.setId(100);
         epic2.setStatus(Status.DONE);
 
-        assertNotEquals(epic2, epic1);
-        assertNotEquals(epic2.hashCode(), epic1.hashCode());
+        assertEquals(epic2, epic1);
+        assertEquals(epic2.hashCode(), epic1.hashCode());
     }
 
     @Test

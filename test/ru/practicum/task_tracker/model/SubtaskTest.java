@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SubtaskTest {
 
     @Test
-    void subtasksWithSameIdNotShouldBeEqual() {
+    void subtasksWithSameIdShouldBeEqual() {
         Subtask subtask1 = new Subtask("Sub 1", "Sub 1 desc", 1);
         subtask1.setId(100);
         subtask1.setStatus(Status.IN_PROGRESS);
@@ -16,8 +16,8 @@ class SubtaskTest {
         subtask2.setId(100);
         subtask2.setStatus(Status.DONE);
 
-        assertNotEquals(subtask1, subtask2);
-        assertNotEquals(subtask1.hashCode(), subtask2.hashCode());
+        assertEquals(subtask1, subtask2);
+        assertEquals(subtask1.hashCode(), subtask2.hashCode());
     }
 
     @Test
