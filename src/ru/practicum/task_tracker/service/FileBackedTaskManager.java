@@ -1,14 +1,14 @@
 package ru.practicum.task_tracker.service;
 
+import ru.practicum.task_tracker.exceptions.ManagerLoadException;
 import ru.practicum.task_tracker.exceptions.ManagerSaveException;
 import ru.practicum.task_tracker.model.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
+    static final String HEADER = "id,type,name,status,description,epicId \n";
 
     public FileBackedTaskManager(HistoryManager historyManager, File file) {
         super(historyManager);
@@ -17,26 +17,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Сохраняет состояние менеджера задач в файл
     private void save() {
-        try (PrintWriter record = new PrintWriter(new FileWriter(file))) {
-            record.write("id,type,name,status,description,epicId \n");
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+            writer.write(HEADER);
             for (Task task : getAllTasks()) {
-                record.write(toString(task) + "\n");
-            }
-
-            for (Task subtask : getAllSubtasks()) {
-                record.write(toString(subtask) + "\n");
+                writer.write(toString(task) + "\n");
             }
 
             for (Task epic : getAllEpics()) {
-                record.write(toString(epic) + "\n");
+                writer.write(toString(epic) + "\n");
             }
 
-            record.write("\n");
-            List<Task> history = getHistory();
-            if (!history.isEmpty()) {
-                record.write(historyToString(historyManager));
+            for (Task subtask : getAllSubtasks()) {
+                writer.write(toString(subtask) + "\n");
             }
-
 
         } catch (IOException e) {
             throw new ManagerSaveException("Не удалось сохранить данные в файл");
@@ -46,24 +39,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private String toString(Task task) {
         String[] fields = {
                 String.valueOf(task.getId()),
-                String.valueOf(getType(task)),
+                String.valueOf(task.getType()),
                 task.getName(),
                 task.getStatus().toString(),
                 task.getDescription(),
                 (task instanceof Subtask) ? String.valueOf(((Subtask) task).getEpicId()) : ""
         };
         return String.join(",", fields);
-    }
-
-    // Определяет тип задачи
-    private TaskType getType(Task task) {
-        if (task instanceof Epic) {
-            return TaskType.EPIC;
-        } else if (task instanceof Subtask) {
-            return TaskType.SUBTASK;
-        } else {
-            return TaskType.TASK;
-        }
     }
 
     // Восстановление менеджера из файла
@@ -85,18 +67,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 if (task != null) {
                     restoreTask(task);
                 }
-
-            }
-            // Читаем историю
-            String historyLine = reader.readLine();
-            if (historyLine != null && !historyLine.isEmpty()) {
-                restoreHistory(historyLine);
             }
 
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("Ошибка! Файл не найден!", e);
+            throw new ManagerLoadException("Ошибка! Файл не найден!", e);
         } catch (IOException e) {
-            throw new ManagerSaveException("Произошла ошибка чтения из файла, возможно файл поврежден", e);
+            throw new ManagerLoadException("Произошла ошибка чтения из файла, возможно файл поврежден", e);
         }
     }
 
@@ -120,47 +96,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private void restoreHistory(String historyLine) {
-        List<Integer> historyIds = historyFromString(historyLine);
-        for (int id : historyIds) {
-            if (tasks.containsKey(id)) {
-                historyManager.add(tasks.get(id));
-            } else if (epics.containsKey(id)) {
-                historyManager.add(epics.get(id));
-            } else if (subtasks.containsKey(id)) {
-                historyManager.add(subtasks.get(id));
-            }
-        }
-    }
-
-    public static List<Integer> historyFromString(String val) {
-        String[] split = val.split(",");
-        List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < split.length; i++) {
-            list.add(Integer.valueOf(split[i]));
-        }
-        return list;
-    }
-
-    // Преобразует историю просмотра задач в строку для сохранения в файл
-    public static String historyToString(HistoryManager historyManager) {
-        List<Task> list = historyManager.getHistory();
-        String record = "";
-        int counter = 0;
-        for (Task task : list) {
-            if (counter < list.size()) {
-                record = record + task.getId() + ",";
-            } else {
-                record = record + task.getId();
-            }
-            counter++;
-        }
-        return record;
-    }
-
     // Восстановление задачи из строки
     private Task fromString(String val) {
-        String[] fields = val.split(",");
+        String[] fields = val.split(",", -1);
         if (fields.length < 5) return null;
 
         int id = Integer.parseInt(fields[0]);
@@ -172,20 +110,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         switch (type) {
             case TASK:
                 Task task = new Task(name, description);
-                task.setStatus(status);
                 task.setId(id);
+                task.setStatus(status);
                 return task;
             case EPIC:
                 Epic epic = new Epic(name, description);
-                epic.setStatus(status);
                 epic.setId(id);
+                epic.setStatus(status);
                 return epic;
             case SUBTASK:
-                if (fields.length < 6) return null;
+                if (fields.length < 6 || fields[5].isEmpty()) return null;
                 int epicId = Integer.parseInt(fields[5]);
                 Subtask subtask = new Subtask(name, description, epicId);
-                subtask.setStatus(status);
                 subtask.setId(id);
+                subtask.setStatus(status);
                 return subtask;
             default:
                 throw new ManagerSaveException("Неизвестный тип объекта" + type);

@@ -43,6 +43,10 @@ public class Epic extends Task {
         subtasksList.add(updatedSubtask);
     }
 
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
+
 
     @Override
     public String toString() {
