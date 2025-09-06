@@ -1,9 +1,13 @@
 package ru.practicum.task_tracker.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Epic extends Task {
     private final ArrayList<Subtask> subtasksList;
+    private LocalDateTime endTime;
 
     public Epic(String title, String description) {
         super(title, description);
@@ -45,6 +49,48 @@ public class Epic extends Task {
 
     public TaskType getType() {
         return TaskType.EPIC;
+    }
+
+    public Duration getDuration() {
+        return subtasksList.stream()
+                .map(Subtask::getDuration)
+                .reduce(Duration.ZERO, Duration::plus);
+    }
+
+    public LocalDateTime getStartTime() {
+        return subtasksList.stream()
+                .map(Subtask::getStartTime)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public void recalculateEpicTime(List<Subtask> subtasks) {
+        List<Subtask> epicSubtasks = subtasks.stream()
+                .filter(subtask -> {
+                    System.out.println("сабтаски" + subtask);
+                    return subtasksList.contains(subtask);
+                })
+                .collect(Collectors.toList());
+        if (epicSubtasks.isEmpty()) {
+            this.endTime = null;
+            return;
+        }
+
+        this.endTime = epicSubtasks.stream()
+                .map(Subtask::getEndTime)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
     }
 
 

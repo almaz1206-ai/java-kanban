@@ -5,10 +5,12 @@ import ru.practicum.task_tracker.exceptions.ManagerSaveException;
 import ru.practicum.task_tracker.model.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
-    static final String HEADER = "id,type,name,status,description,epicId \n";
+    static final String HEADER = "id,type,name,status,description,epicId,startTime,duration,endTime\n";
 
     public FileBackedTaskManager(HistoryManager historyManager, File file) {
         super(historyManager);
@@ -43,7 +45,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 task.getName(),
                 task.getStatus().toString(),
                 task.getDescription(),
-                (task instanceof Subtask) ? String.valueOf(((Subtask) task).getEpicId()) : ""
+                task.getType() == TaskType.SUBTASK ? String.valueOf(((Subtask) task).getEpicId()) : "",
+                task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "0",
+                task.getStartTime() != null ? task.getStartTime().toString() : "",
         };
         return String.join(",", fields);
     }
@@ -106,10 +110,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = fields[2];
         Status status = Status.valueOf(fields[3]);
         String description = fields[4];
+        Duration duration = Duration.ofMinutes(0);
+        if (fields.length > 6 && !fields[6].isEmpty()) {
+            duration = Duration.ofMinutes(Long.parseLong(fields[6]));
+        }
+
+        LocalDateTime startTime = null;
+        if (fields.length > 7 && !fields[7].isEmpty()) {
+            startTime = LocalDateTime.parse(fields[7]);
+        }
 
         switch (type) {
             case TASK:
-                Task task = new Task(name, description);
+                Task task = new Task(name, description, duration, startTime);
                 task.setId(id);
                 task.setStatus(status);
                 return task;
@@ -121,7 +134,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case SUBTASK:
                 if (fields.length < 6 || fields[5].isEmpty()) return null;
                 int epicId = Integer.parseInt(fields[5]);
-                Subtask subtask = new Subtask(name, description, epicId);
+                Subtask subtask = new Subtask(name, description, epicId, duration, startTime);
                 subtask.setId(id);
                 subtask.setStatus(status);
                 return subtask;
