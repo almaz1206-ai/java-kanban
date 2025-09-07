@@ -32,10 +32,10 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
         Task task1 = new Task("Task 1 - 10:00", "Description");
         task1.setStartTime(LocalDateTime.of(2023, 1, 1, 10, 0));
-        task1.setDuration(Duration.ofHours(1));
+        task1.setDuration(Duration.ofMinutes(59));
 
-        Task task2 = new Task("Task 2 - 11:01", "Description");
-        task2.setStartTime(LocalDateTime.of(2023, 1, 1, 11, 1));
+        Task task2 = new Task("Task 2 - 11:00", "Description");
+        task2.setStartTime(LocalDateTime.of(2023, 1, 1, 11, 0));
         task2.setDuration(Duration.ofMinutes(50));
 
         taskManager.addTask(task3);
@@ -46,11 +46,11 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
         assertEquals(3, prioritizedTasks.size(), "Должно быть 3 задачи");
         assertEquals("Task 1 - 10:00", prioritizedTasks.get(0).getName(), "Первая задача должна быть самой ранней");
-        assertEquals("Task 2 - 11:01", prioritizedTasks.get(1).getName(), "Вторая задача по времени");
+        assertEquals("Task 2 - 11:00", prioritizedTasks.get(1).getName(), "Вторая задача по времени");
         assertEquals("Task 3 - 12:00", prioritizedTasks.get(2).getName(), "Третья задача должна быть самой поздней");
 
         assertEquals(LocalDateTime.of(2023, 1, 1, 10, 0), prioritizedTasks.get(0).getStartTime());
-        assertEquals(LocalDateTime.of(2023, 1, 1, 11, 1), prioritizedTasks.get(1).getStartTime());
+        assertEquals(LocalDateTime.of(2023, 1, 1, 11, 0), prioritizedTasks.get(1).getStartTime());
         assertEquals(LocalDateTime.of(2023, 1, 1, 12, 0), prioritizedTasks.get(2).getStartTime());
     }
 }

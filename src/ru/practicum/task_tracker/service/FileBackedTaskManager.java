@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
-    static final String HEADER = "id,type,name,status,description,epicId,startTime,duration,endTime\n";
+    private static final String HEADER = "id,type,name,status,description,epicId,startTime,duration\n";
 
     public FileBackedTaskManager(HistoryManager historyManager, File file) {
         super(historyManager);
@@ -72,7 +72,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     restoreTask(task);
                 }
             }
-
+            recalculateAllEpicsTime();
         } catch (FileNotFoundException e) {
             throw new ManagerLoadException("Ошибка! Файл не найден!", e);
         } catch (IOException e) {
@@ -90,8 +90,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             if (epic != null) {
                 epic.addSubtask((Subtask) task);
             }
+            addToPrioritized(task);
         } else {
             tasks.put(task.getId(), task);
+            addToPrioritized(task);
         }
 
         // Обновляем счетчик ID
@@ -110,7 +112,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = fields[2];
         Status status = Status.valueOf(fields[3]);
         String description = fields[4];
-        Duration duration = Duration.ofMinutes(0);
+        Duration duration = null;
         if (fields.length > 6 && !fields[6].isEmpty()) {
             duration = Duration.ofMinutes(Long.parseLong(fields[6]));
         }
@@ -122,9 +124,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         switch (type) {
             case TASK:
-                Task task = new Task(name, description, duration, startTime);
+                Task task = new Task(name, description);
                 task.setId(id);
                 task.setStatus(status);
+                if (duration != null) task.setDuration(duration);
+                if (startTime != null) task.setStartTime(startTime);
                 return task;
             case EPIC:
                 Epic epic = new Epic(name, description);
@@ -134,13 +138,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case SUBTASK:
                 if (fields.length < 6 || fields[5].isEmpty()) return null;
                 int epicId = Integer.parseInt(fields[5]);
-                Subtask subtask = new Subtask(name, description, epicId, duration, startTime);
+                Subtask subtask = new Subtask(name, description, epicId);
                 subtask.setId(id);
                 subtask.setStatus(status);
+                if (duration != null) subtask.setDuration(duration);
+                if (startTime != null) subtask.setStartTime(startTime);
                 return subtask;
             default:
                 throw new ManagerSaveException("Неизвестный тип объекта" + type);
         }
+    }
+
+    private void recalculateAllEpicsTime() {
+        epics.values().forEach(Epic::recalculateEpicTime);
     }
 
     @Override
