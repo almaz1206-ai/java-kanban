@@ -67,4 +67,7 @@ public interface TaskManager {
 
     // Возвращает массив с иторией
     List<Task> getHistory();
+
+    // Возвращает массив задач в заданном порядке
+    List<Task> getPrioritizedTasks();
 }

@@ -11,22 +11,32 @@ import ru.practicum.task_tracker.model.Task;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private File testFile;
-    private FileBackedTaskManager manager;
+
+    @Override
+    protected FileBackedTaskManager createTaskManager() {
+        try {
+            testFile = File.createTempFile("test", "csv");
+            return new FileBackedTaskManager(Managers.getDefaultHistory(), testFile);
+        } catch (IOException e) {
+            throw new RuntimeException("", e);
+        }
+    }
 
     @BeforeEach
-    void setUp() throws IOException {
-        testFile = File.createTempFile("test_tasks", ".csv");
-        manager = new FileBackedTaskManager(Managers.getDefaultHistory(), testFile);
+    public void setUp() {
+        taskManager = createTaskManager();
     }
 
     @AfterEach
     void tearDown() {
-        if (testFile.exists()) {
+        if (testFile != null && testFile.exists()) {
             testFile.delete();
         }
     }
@@ -40,8 +50,7 @@ class FileBackedTaskManagerTest {
         testFile = File.createTempFile("test", ".csv");
         testFile.deleteOnExit();
 
-        FileBackedTaskManager manager = new FileBackedTaskManager(
-                Managers.getDefaultHistory(), testFile);
+        FileBackedTaskManager manager = createTaskManager();
 
         Task task = new Task("Test Task", "Description");
         int taskId = manager.addTask(task);
@@ -79,11 +88,11 @@ class FileBackedTaskManagerTest {
     void testSaveAndLoadTasks() {
         Task task1 = new Task("Task 1", "Description 1");
         Task task2 = new Task("Task 2", "Description 2");
-        int id1 = manager.addTask(task1);
-        int id2 = manager.addTask(task2);
+        int id1 = taskManager.addTask(task1);
+        int id2 = taskManager.addTask(task2);
 
         task1.setStatus(Status.IN_PROGRESS);
-        manager.updateTask(task1);
+        taskManager.updateTask(task1);
 
         FileBackedTaskManager loadedManager = loadManager();
 
@@ -105,13 +114,13 @@ class FileBackedTaskManagerTest {
     void testSubtaskEpicLinksRestored() {
         Epic epic1 = new Epic("Epic 1", "Desc 1");
         Epic epic2 = new Epic("Epic 2", "Desc 2");
-        int epic1Id = manager.addEpic(epic1);
-        int epic2Id = manager.addEpic(epic2);
+        int epic1Id = taskManager.addEpic(epic1);
+        int epic2Id = taskManager.addEpic(epic2);
 
         Subtask subtask1 = new Subtask("Sub 1", "Desc", epic1Id);
         Subtask subtask2 = new Subtask("Sub 2", "Desc", epic2Id);
-        int subtask1Id = manager.addSubtask(subtask1);
-        int subtask2Id = manager.addSubtask(subtask2);
+        int subtask1Id = taskManager.addSubtask(subtask1);
+        int subtask2Id = taskManager.addSubtask(subtask2);
 
         FileBackedTaskManager loadedManager = loadManager();
 
@@ -134,19 +143,19 @@ class FileBackedTaskManagerTest {
     void testAllOperations() {
         Task task = new Task("Task", "Desc");
         Epic epic = new Epic("Epic", "Desc");
-        int taskId = manager.addTask(task);
-        int epicId = manager.addEpic(epic);
+        int taskId = taskManager.addTask(task);
+        int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Subtask", "Desc", epicId);
-        int subtaskId = manager.addSubtask(subtask);
+        int subtaskId = taskManager.addSubtask(subtask);
 
         task.setStatus(Status.IN_PROGRESS);
-        manager.updateTask(task);
+        taskManager.updateTask(task);
         subtask.setStatus(Status.DONE);
-        manager.updateSubtask(subtask);
+        taskManager.updateSubtask(subtask);
 
-        manager.getTaskById(taskId);
-        manager.getEpicById(epicId);
-        manager.getSubtaskById(subtaskId);
+        taskManager.getTaskById(taskId);
+        taskManager.getEpicById(epicId);
+        taskManager.getSubtaskById(subtaskId);
 
         FileBackedTaskManager loadedManager = loadManager();
 
@@ -165,4 +174,99 @@ class FileBackedTaskManagerTest {
         assertEquals(Status.DONE, loadedEpic.getStatus());
         assertEquals(1, loadedEpic.getSubtasksList().size());
     }
+
+    @Test
+    void shouldSaveAndLoadTaskWithTimeFieldsWhenTaskAdded() {
+        LocalDateTime startTime = LocalDateTime.of(2023, 1, 1, 10, 0);
+        Duration duration = Duration.ofHours(2);
+        Task task = new Task("Task with Time", "Description");
+        task.setStartTime(startTime);
+        task.setDuration(duration);
+
+        int taskId = taskManager.addTask(task);
+        FileBackedTaskManager loadedManager = loadManager();
+
+        Task loadedTask = loadedManager.getTaskById(taskId);
+        assertNotNull(loadedTask);
+        assertEquals(startTime, loadedTask.getStartTime());
+        assertEquals(duration, loadedTask.getDuration());
+        assertEquals(startTime.plus(duration), loadedTask.getEndTime());
+    }
+
+    @Test
+    void shouldSaveAndLoadEpicTimeFieldsWhenSubtaskAdded() {
+        LocalDateTime startTime = LocalDateTime.of(2023, 1, 1, 10, 0);
+        Duration duration = Duration.ofHours(1);
+
+        Epic epic = new Epic("Test Epic", "Description");
+        int epicId = taskManager.addEpic(epic);
+
+        Subtask subtask = new Subtask("Subtask", "Desc", epicId);
+        subtask.setStartTime(startTime);
+        subtask.setDuration(duration);
+
+        taskManager.addSubtask(subtask);
+        FileBackedTaskManager loadedManager = loadManager();
+
+        Epic loadedEpic = loadedManager.getEpicById(epicId);
+        assertNotNull(loadedEpic);
+        assertEquals(startTime, loadedEpic.getStartTime());
+        assertEquals(duration, loadedEpic.getDuration());
+        assertEquals(startTime.plus(duration), loadedEpic.getEndTime());
+    }
+
+    @Test
+    void shouldSaveAndLoadMixedOperations() {
+        LocalDateTime taskStartTime = LocalDateTime.of(2023, 1, 1, 9, 0);
+        LocalDateTime subtaskStartTime = LocalDateTime.of(2023, 1, 1, 11, 0);
+        Epic epic = new Epic("Parent Epic", "Description");
+        int epicId = taskManager.addEpic(epic);
+
+        Task task = new Task("Regular Task", "Description");
+        task.setStartTime(taskStartTime);
+        int taskId = taskManager.addTask(task);
+
+        Subtask subtask = new Subtask("Subtask", "Description", epicId);
+        subtask.setStartTime(subtaskStartTime);
+        int subtaskId = taskManager.addSubtask(subtask);
+
+        taskManager.getTaskById(taskId);
+        taskManager.getSubtaskById(subtaskId);
+
+        FileBackedTaskManager loadedManager = loadManager();
+
+        assertEquals(2, loadedManager.getPrioritizedTasks().size());
+
+        Epic loadedEpic = loadedManager.getEpicById(epicId);
+        assertNotNull(loadedEpic);
+        assertEquals(subtaskStartTime, loadedEpic.getStartTime());
+    }
+
+
+    @Test
+    void shouldMaintainTimeFieldsAfterMultipleSaveLoadCycles() {
+        LocalDateTime startTime = LocalDateTime.of(2023, 1, 1, 10, 0);
+        Duration duration = Duration.ofHours(2);
+        LocalDateTime updatedTaskStartTime = LocalDateTime.of(2023, 1, 1, 8, 0);
+        Duration updatedTaskDuration = Duration.ofHours(3);
+        Task task = new Task("Test Task", "Description");
+        task.setStartTime(startTime);
+        task.setDuration(duration);
+        int taskId = taskManager.addTask(task);
+
+        FileBackedTaskManager manager1 = loadManager();
+
+        Task updatedTask = manager1.getTaskById(taskId);
+        updatedTask.setStartTime(updatedTaskStartTime);
+        updatedTask.setDuration(updatedTaskDuration);
+        manager1.updateTask(updatedTask);
+
+        FileBackedTaskManager manager2 = loadManager();
+        Task finalTask = manager2.getTaskById(taskId);
+
+        assertEquals(updatedTaskStartTime, finalTask.getStartTime());
+        assertEquals(Duration.ofHours(3), finalTask.getDuration());
+        assertEquals(updatedTaskStartTime.plus(updatedTaskDuration), finalTask.getEndTime());
+    }
+
 }
