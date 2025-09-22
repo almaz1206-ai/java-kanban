@@ -4,9 +4,6 @@
     <content url="file://$MODULE_DIR$" dumb="true">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/test/model" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/test/service" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/tests" />
     </content>
   </component>
 </module>

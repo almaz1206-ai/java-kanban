@@ -2,8 +2,8 @@ package ru.practicum.task_tracker.server;
 
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import ru.practicum.task_tracker.exceptions.NotFoundException;
+import ru.practicum.task_tracker.exceptions.TimeOverlapException;
 import ru.practicum.task_tracker.model.Epic;
 import ru.practicum.task_tracker.model.Subtask;
 import ru.practicum.task_tracker.service.TaskManager;
@@ -11,7 +11,7 @@ import ru.practicum.task_tracker.service.TaskManager;
 import java.io.IOException;
 import java.util.List;
 
-public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+public class EpicsHandler extends BaseHttpHandler {
 
     public EpicsHandler(TaskManager taskManager) {
         super(taskManager);
@@ -42,16 +42,14 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                     }
                     break;
                 case "POST":
-                    handleCreateOrUpdateEpic(exchange);
+                    handleCreateEpic(exchange);
                     break;
                 case "DELETE":
                     if (pathParts.length == 3) {
                         int id = Integer.parseInt(pathParts[2]);
                         handleDeleteEpicById(exchange, id);
-                    } else if (pathParts.length == 2) {
-                        handleDeleteAllEpics(exchange);
                     } else {
-                        sendNotFound(exchange, "Запрашиваемый ресурс не существует");
+                        sendNotFound(exchange, "Эпика с данным идентификатором не существует");
                     }
                     break;
                 default:
@@ -59,91 +57,49 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             }
         } catch (NumberFormatException e) {
             sendBadRequest(exchange, "Неверный формат id задачи");
+        } catch (JsonSyntaxException e) {
+            sendBadRequest(exchange, "Некорректный JSON");
+        } catch (NotFoundException e) {
+            sendNotFound(exchange, e.getMessage());
+        } catch (TimeOverlapException e) {
+            sendHasOverlaps(exchange);
         } catch (Exception e) {
             sendInternalError(exchange);
+        } finally {
+            exchange.close();
         }
     }
 
     private void handleGetEpicSubtasks(HttpExchange exchange, int id) throws IOException {
-        try {
-            List<Subtask> subtaskList = taskManager.getSubtasksByEpic(id);
-            String response = GSON.toJson(subtaskList);
-            sendText(exchange, response, 200);
-        } catch (NotFoundException e) {
-            sendNotFound(exchange, "Эпик не найден");
-        } catch (Exception e) {
-            sendInternalError(exchange);
-        }
+        List<Subtask> subtaskList = taskManager.getSubtasksByEpic(id);
+        String response = gson.toJson(subtaskList);
+        sendText(exchange, response, 200);
     }
 
     private void handleGetAllEpics(HttpExchange exchange) throws IOException {
-        try {
-            List<Epic> epicList = taskManager.getAllEpics();
-            String response = GSON.toJson(epicList);
-            sendText(exchange, response, 200);
-        } catch (Exception e) {
-            sendInternalError(exchange);
-        }
+        List<Epic> epicList = taskManager.getAllEpics();
+        String response = gson.toJson(epicList);
+        sendText(exchange, response, 200);
     }
 
     private void handleGetEpicById(HttpExchange exchange, int id) throws IOException {
-        try {
-            Epic epic = taskManager.getEpicById(id);
-            String response = GSON.toJson(epic);
-            sendText(exchange, response, 200);
-        } catch (NotFoundException e) {
-            sendNotFound(exchange, "Эпик не найден");
-        }
+        Epic epic = taskManager.getEpicById(id);
+        String response = gson.toJson(epic);
+        sendText(exchange, response, 200);
     }
 
-    private void handleCreateOrUpdateEpic(HttpExchange exchange) throws IOException {
+    private void handleCreateEpic(HttpExchange exchange) throws IOException {
         String body = readText(exchange);
-        Epic epic;
+        Epic epic = gson.fromJson(body, Epic.class);
 
-        try {
-            epic = GSON.fromJson(body, Epic.class);
-        } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Некорректный JSON");
-            return;
-        }
-
-        try {
-            if (epic.getId() == 0) {
-                int createdEpicId = taskManager.addEpic(epic);
-                Epic saved = taskManager.getEpicById(createdEpicId);
-                String response = GSON.toJson(saved);
-                sendText(exchange, response, 201);
-            } else {
-                taskManager.updateEpic(epic);
-                Epic updated = taskManager.getEpicById(epic.getId());
-                String response = GSON.toJson(updated);
-                sendText(exchange, response, 200);
-            }
-        } catch (NotFoundException e) {
-            sendNotFound(exchange, "Эпик не найден");
-        } catch (Exception e) {
-            sendInternalError(exchange);
-        }
-
+        int createdEpicId = taskManager.addEpic(epic);
+        Epic saved = taskManager.getEpicById(createdEpicId);
+        String response = gson.toJson(saved);
+        sendText(exchange, response, 201);
     }
 
     private void handleDeleteEpicById(HttpExchange exchange, int id) throws IOException {
-        try {
-            taskManager.deleteEpicById(id);
-            sendText(exchange, "{\"message\": \"Эпик удален\"}", 200);
-        } catch (NotFoundException e) {
-            sendNotFound(exchange, "Эпик не найден");
-        } catch (Exception e) {
-            sendInternalError(exchange);
-        }
-    }
-
-    private void handleDeleteAllEpics(HttpExchange exchange) throws IOException {
-        try {
-            taskManager.deleteAllEpics();
-            sendText(exchange, "{\"message\": \"Все эпики удалены\"}", 200);
-        } catch (Exception e) {
-            sendInternalError(exchange);
-        }
+        taskManager.deleteEpicById(id);
+        sendText(exchange, "{\"message\": \"Эпик удален\"}", 200);
     }
 }

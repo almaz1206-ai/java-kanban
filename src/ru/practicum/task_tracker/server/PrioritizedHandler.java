@@ -1,14 +1,13 @@
 package ru.practicum.task_tracker.server;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import ru.practicum.task_tracker.model.Task;
 import ru.practicum.task_tracker.service.TaskManager;
 
 import java.io.IOException;
 import java.util.List;
 
-public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
+public class PrioritizedHandler extends BaseHttpHandler {
 
     public PrioritizedHandler(TaskManager taskManager) {
         super(taskManager);
@@ -19,7 +18,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
         try {
             if ("GET".equals(exchange.getRequestMethod())) {
                 List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
-                String response = GSON.toJson(prioritizedTasks);
+                String response = gson.toJson(prioritizedTasks);
                 sendText(exchange, response, 200);
             } else {
                 sendMethodNotAllowed(exchange);

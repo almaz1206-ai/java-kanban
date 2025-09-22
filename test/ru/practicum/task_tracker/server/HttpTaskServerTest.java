@@ -1,10 +1,13 @@
 package ru.practicum.task_tracker.server;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.practicum.task_tracker.adapter.DurationAdapter;
+import ru.practicum.task_tracker.adapter.LocalDateTimeAdapter;
 import ru.practicum.task_tracker.model.Epic;
 import ru.practicum.task_tracker.model.Status;
 import ru.practicum.task_tracker.model.Subtask;
@@ -28,7 +31,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class HttpTaskServerTest {
     private static final String BASE_URL = "http://localhost:8080";
     private final TaskManager manager = new InMemoryTaskManager(Managers.getDefaultHistory());
-    private final Gson gson = BaseHttpHandler.GSON;
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapter(Duration.class, new DurationAdapter())
+            .create();
     private HttpTaskServer server;
     private HttpClient client;
 
@@ -195,28 +201,6 @@ class HttpTaskServerTest {
         assertNotNull(retrieved);
         assertEquals(id, retrieved.getId());
         assertEquals("Для получения", retrieved.getName());
-    }
-
-    @Test
-    public void testUpdateEpic() throws IOException, InterruptedException {
-        Epic epic = new Epic("Для обновления", "Будет обновлён");
-        int id = manager.addEpic(epic);
-
-        epic.setName("Обновлённое имя эпика");
-        String json = gson.toJson(epic);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/epics"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        assertEquals(200, response.statusCode());
-
-        Epic updated = manager.getEpicById(id);
-        assertEquals("Обновлённое имя эпика", updated.getName());
     }
 
     @Test
